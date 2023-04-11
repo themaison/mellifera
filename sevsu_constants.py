@@ -1,0 +1,6 @@
+SEVSU_URL = 'https://www.sevsu.ru/'
+LK_URL = 'https://lk.sevsu.ru/user/sign-in/userset'
+DO_SEVSU_URL = 'https://do.sevsu.ru/my/'
+ROCKET_CHAT_URL = 'https://chat.is.sevsu.ru/'
+ELECTIVE_URL = 'https://elective.sevsu.ru/dashboard'
+SCHEDULE_URL = 'https://www.sevsu.ru/univers/shedule/'
