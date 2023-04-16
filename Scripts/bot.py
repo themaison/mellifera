@@ -1,8 +1,8 @@
 import logging
 import config
-import messages_constants as mconst
 import gpt_model
 import keyboards as skb
+import messages_constants as msgc
 
 from schedule import schedule as sch
 from schedule import weekly_schedule as wsch
@@ -39,19 +39,19 @@ wsch_obj = wsch.WeeklySchedule()
 
 async def anti_flood(*args, **kwargs):
     message = args[0]
-    await message.answer(text=mconst.base_messages.get('anti_flood'), parse_mode='Markdown')
+    await message.answer(text=msgc.base_messages.get('anti_flood'), parse_mode='Markdown')
 
 
 @dp.message_handler(commands=['start', 'help'])
 @dp.throttled(rate=3)
 async def send_welcome(message: types.Message):
-    await message.answer(text=mconst.base_messages.get('help'), parse_mode='Markdown')
+    await message.answer(text=msgc.base_messages.get('help'), parse_mode='Markdown')
 
 
 @dp.message_handler(commands=['sev'])
 @dp.throttled(rate=3)
 async def sev_command(message: types.Message):
-    await message.answer(text=mconst.sevsu_messages.get('sevsu_urls'),
+    await message.answer(text=msgc.sevsu_messages.get('sevsu_urls'),
                          reply_markup=skb.get_sevsu_keyboard(),
                          parse_mode='Markdown')
 
@@ -69,13 +69,13 @@ async def send_schedule(message: types.Message):
     print(message.from_user.full_name)
 
     await message.delete()
-    process_message = await message.answer(text=mconst.schedule_messages.get('check'),
+    process_message = await message.answer(text=msgc.schedule_messages.get('check'),
                                            parse_mode='Markdown')
     try:
         is_download_required = sch_obj.check_to_download()
         if is_download_required:
             await process_message.delete()
-            process_message = await message.answer(text=mconst.schedule_messages.get('update_process'),
+            process_message = await message.answer(text=msgc.schedule_messages.get('update_process'),
                                                    parse_mode='Markdown')
 
             sch_obj.download()
@@ -84,14 +84,14 @@ async def send_schedule(message: types.Message):
             sch_obj.define_available_weeks()
             sch_obj.save_available_weeks_data()
 
-            await message.answer(text=mconst.schedule_messages.get('updated'),
+            await message.answer(text=msgc.schedule_messages.get('updated'),
                                  parse_mode='Markdown')
 
         if not sch_obj.available_weeks:
             sch_obj.define_available_weeks()
             sch_obj.save_available_weeks_data()
 
-        await message.answer(text=mconst.schedule_messages.get('group'),
+        await message.answer(text=msgc.schedule_messages.get('group'),
                              reply_markup=skb.get_schedule_groups_keyboard(),
                              parse_mode='Markdown')
         await ScheduleStatesGroup.group.set()
@@ -105,7 +105,7 @@ async def send_schedule(message: types.Message):
 async def cancel_schedule(message: types.Message, state: FSMContext):
     if state is None:
         return
-    await message.answer(text=mconst.schedule_messages.get('cancel'),
+    await message.answer(text=msgc.schedule_messages.get('cancel'),
                          reply_markup=ReplyKeyboardRemove(),
                          parse_mode='Markdown')
     await message.delete()
@@ -118,7 +118,7 @@ async def schedule_improve_process(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
         data['group'] = int(message.text[-3]) if 'ИС' in message.text else 4
 
-    bot_message = await message.answer(text=mconst.schedule_messages.get('load'),
+    bot_message = await message.answer(text=msgc.schedule_messages.get('load'),
                                        reply_markup=ReplyKeyboardRemove(),
                                        parse_mode='Markdown')
 
@@ -144,7 +144,7 @@ async def schedule_improve_process(message: types.Message, state: FSMContext):
             lsm.chat_id = message.chat.id
             lsm.save_message_data()
         else:
-            await message.answer(mconst.schedule_messages.get('holiday'), parse_mode='Markdown')
+            await message.answer(msgc.schedule_messages.get('holiday'), parse_mode='Markdown')
     except:
         await message.answer('📦 Ошибка при загрузке данных')
     finally:
@@ -157,14 +157,14 @@ async def schedule_improve_process(message: types.Message, state: FSMContext):
 async def send_gpt_request(message: types.Message):
     print(f'Отправитель: {message.from_user.full_name}\nЗапрос: {message.text}\n\n')
 
-    bot_message = await message.answer(text=mconst.get_rand_process_message(),
+    bot_message = await message.answer(text=msgc.get_rand_process_message(),
                                        parse_mode='Markdown')
     try:
         gpt_response = gpt_model.response_to_message(message.text.partition(' ')[2])
         await message.reply(text=gpt_response,
                             parse_mode='Markdown')
     except:
-        await message.answer(text=mconst.base_messages.get('error'),
+        await message.answer(text=msgc.base_messages.get('error'),
                              parse_mode='Markdown')
     finally:
         await bot_message.delete()
@@ -173,7 +173,7 @@ async def send_gpt_request(message: types.Message):
 @dp.callback_query_handler(lambda callback: callback.data.startswith('schedule_week'))
 async def callback_schedule_weeks(callback: types.CallbackQuery):
     await callback.message.delete()
-    bot_message = await callback.message.answer(text=mconst.schedule_messages.get('load'),
+    bot_message = await callback.message.answer(text=msgc.schedule_messages.get('load'),
                                                 reply_markup=ReplyKeyboardRemove(),
                                                 parse_mode='Markdown')
 
