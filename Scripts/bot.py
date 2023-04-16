@@ -62,14 +62,15 @@ async def send_schedule(message: types.Message):
     try:
         if lsm.message_id:
             await bot.edit_message_reply_markup(chat_id=lsm.chat_id, message_id=lsm.message_id, reply_markup=InlineKeyboardMarkup())
-    except ...:
+    except:
         pass
 
     wsch_obj.set_default_values()
     print(message.from_user.full_name)
 
     await message.delete()
-    process_message = await message.answer(text=mconst.schedule_messages.get('check'), parse_mode='Markdown')
+    process_message = await message.answer(text=mconst.schedule_messages.get('check'),
+                                           parse_mode='Markdown')
     try:
         is_download_required = sch_obj.check_to_download()
         if is_download_required:
@@ -83,7 +84,8 @@ async def send_schedule(message: types.Message):
             sch_obj.define_available_weeks()
             sch_obj.save_available_weeks_data()
 
-            await message.answer(text=mconst.schedule_messages.get('updated'), parse_mode='Markdown')
+            await message.answer(text=mconst.schedule_messages.get('updated'),
+                                 parse_mode='Markdown')
 
         if not sch_obj.available_weeks:
             sch_obj.define_available_weeks()
@@ -93,7 +95,7 @@ async def send_schedule(message: types.Message):
                              reply_markup=skb.get_schedule_groups_keyboard(),
                              parse_mode='Markdown')
         await ScheduleStatesGroup.group.set()
-    except ...:
+    except:
         await message.answer('♻️ Ошибка при скачивании файла')
     finally:
         await process_message.delete()
@@ -103,12 +105,15 @@ async def send_schedule(message: types.Message):
 async def cancel_schedule(message: types.Message, state: FSMContext):
     if state is None:
         return
-    await message.answer(text=mconst.schedule_messages.get('cancel'), reply_markup=ReplyKeyboardRemove(), parse_mode='Markdown')
+    await message.answer(text=mconst.schedule_messages.get('cancel'),
+                         reply_markup=ReplyKeyboardRemove(),
+                         parse_mode='Markdown')
     await message.delete()
     await state.finish()
 
 
-@dp.message_handler(filters.Text(equals=['ИСб-21-1-о', 'ИСб-21-2-о', 'ИСб-21-3-о', 'ПИб-21-1-о']), state=ScheduleStatesGroup.group)
+@dp.message_handler(filters.Text(equals=['ИСб-21-1-о', 'ИСб-21-2-о', 'ИСб-21-3-о', 'ПИб-21-1-о']),
+                    state=ScheduleStatesGroup.group)
 async def schedule_improve_process(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
         data['group'] = int(message.text[-3]) if 'ИС' in message.text else 4
@@ -140,7 +145,7 @@ async def schedule_improve_process(message: types.Message, state: FSMContext):
             lsm.save_message_data()
         else:
             await message.answer(mconst.schedule_messages.get('holiday'), parse_mode='Markdown')
-    except ...:
+    except:
         await message.answer('📦 Ошибка при загрузке данных')
     finally:
         await bot_message.delete()
@@ -152,12 +157,15 @@ async def schedule_improve_process(message: types.Message, state: FSMContext):
 async def send_gpt_request(message: types.Message):
     print(f'Отправитель: {message.from_user.full_name}\nЗапрос: {message.text}\n\n')
 
-    bot_message = await message.answer(text=mconst.get_rand_process_message(), parse_mode='Markdown')
+    bot_message = await message.answer(text=mconst.get_rand_process_message(),
+                                       parse_mode='Markdown')
     try:
         gpt_response = gpt_model.response_to_message(message.text.partition(' ')[2])
-        await message.reply(text=gpt_response)
-    except ...:
-        await message.answer(text=mconst.base_messages.get('error'), parse_mode='Markdown')
+        await message.reply(text=gpt_response,
+                            parse_mode='Markdown')
+    except:
+        await message.answer(text=mconst.base_messages.get('error'),
+                             parse_mode='Markdown')
     finally:
         await bot_message.delete()
 
@@ -206,7 +214,8 @@ async def callback_weekly_schedule_days(callback: types.CallbackQuery):
         wsch_obj.day_num = day_num
         schedule_day_text = wsch_obj.get_weekly_schedule_day()
         await callback.message.edit_text(text=schedule_day_text, parse_mode='Markdown')
-        await callback.message.edit_reply_markup(reply_markup=skb.get_weekly_schedule_keyboard(sch_obj.available_weeks, wsch_obj.week_num))
+        schedule_markup = skb.get_weekly_schedule_keyboard(sch_obj.available_weeks, wsch_obj.week_num)
+        await callback.message.edit_reply_markup(reply_markup=schedule_markup )
         await callback.answer()
 
 if __name__ == '__main__':
