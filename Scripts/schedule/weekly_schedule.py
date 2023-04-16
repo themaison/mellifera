@@ -1,7 +1,7 @@
 import json
 
-from sevsch import schedule as sch
-from sevsch import schedule_constants as sc
+from schedule import schedule as sch
+from schedule import constants as sc
 from openpyxl import Workbook, load_workbook
 from datetime import datetime
 from os import path
@@ -51,6 +51,11 @@ class WeeklySchedule:
         self.week_num = week_num
         self.day_num = day_num
         self.weekly_schedule = dict()
+
+    def set_default_values(self):
+        self.group_num = 2
+        self.week_num = get_week()
+        self.day_num = get_week_day()
 
     def get_weekly_schedule_day(self):
         return self.weekly_schedule.get(sc.DAY_NAMES.get(self.day_num))

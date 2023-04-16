@@ -1,7 +1,7 @@
 import requests
 import json
 
-from sevsch import schedule_constants as sc
+from schedule import constants as sc
 from openpyxl import load_workbook
 from os import path, remove, listdir
 from bs4 import BeautifulSoup

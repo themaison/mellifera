@@ -1,4 +1,4 @@
-from sevsch import sevsu_url_constants as suc
+import sevsu_constants as suc
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
