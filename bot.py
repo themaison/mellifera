@@ -1,10 +1,10 @@
 import logging
 import config
 import gpt_model
-import schedule
-import keyboards
-import weekly_schedule
 
+from sevsch import schedule as sch
+from sevsch import weekly_schedule as wsch
+from sevsch import keyboards as skb
 from bot_messages import base_messages, schedule_messages, sevsu_messages, get_rand_process_message
 from aiogram import Bot, Dispatcher, executor, types
 from aiogram.types import ReplyKeyboardRemove, InlineKeyboardMarkup
@@ -26,14 +26,14 @@ class ScheduleStatesGroup(StatesGroup):
     group = State()
 
 
-schedule_obj = schedule.Schedule()
+schedule_obj = sch.Schedule()
 schedule_obj.load_url()
 schedule_obj.load_available_weeks()
 
-lsm = schedule.LastScheduleMessage()
+lsm = sch.LastScheduleMessage()
 lsm.load_message_data()
 
-weekly_schedule_obj = weekly_schedule.WeeklySchedule()
+weekly_schedule_obj = wsch.WeeklySchedule()
 
 
 async def anti_flood(*args, **kwargs):
@@ -51,7 +51,7 @@ async def send_welcome(message: types.Message):
 @dp.throttled(rate=3)
 async def sev_command(message: types.Message):
     await message.answer(text=sevsu_messages.get('sevsu_urls'),
-                         reply_markup=keyboards.get_sevsu_keyboard(),
+                         reply_markup=skb.get_sevsu_keyboard(),
                          parse_mode='Markdown')
 
 
@@ -61,7 +61,7 @@ async def send_schedule(message: types.Message):
     try:
         if lsm.message_id:
             await bot.edit_message_reply_markup(chat_id=lsm.chat_id, message_id=lsm.message_id, reply_markup=InlineKeyboardMarkup())
-    except:
+    except ...:
         pass
 
     await message.delete()
@@ -86,11 +86,11 @@ async def send_schedule(message: types.Message):
             schedule_obj.save_available_weeks_data()
 
         await message.answer(text=schedule_messages.get('group'),
-                             reply_markup=keyboards.get_schedule_groups_keyboard(),
+                             reply_markup=skb.get_schedule_groups_keyboard(),
                              parse_mode='Markdown')
         await ScheduleStatesGroup.group.set()
-    except:
-        await message.answer('Ошибка при скачивании файла')
+    except ...:
+        await message.answer('♻️ Ошибка при скачивании файла')
     finally:
         await process_message.delete()
 
@@ -99,7 +99,7 @@ async def send_schedule(message: types.Message):
 async def cancel_schedule(message: types.Message, state: FSMContext):
     if state is None:
         return
-    await message.answer(text=schedule_messages.get('cancel'), reply_markup=ReplyKeyboardRemove())
+    await message.answer(text=schedule_messages.get('cancel'), reply_markup=ReplyKeyboardRemove(), parse_mode='Markdown')
     await message.delete()
     await state.finish()
 
@@ -109,7 +109,9 @@ async def schedule_improve_process(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
         data['group'] = int(message.text[-3]) if 'ИС' in message.text else 4
 
-    bot_message = await message.answer(text=schedule_messages.get('load'), reply_markup=ReplyKeyboardRemove())
+    bot_message = await message.answer(text=schedule_messages.get('load'),
+                                       reply_markup=ReplyKeyboardRemove(),
+                                       parse_mode='Markdown')
 
     try:
         weekly_schedule_obj.group_num = data['group']
@@ -124,16 +126,18 @@ async def schedule_improve_process(message: types.Message, state: FSMContext):
                 weekly_schedule_obj.save_data()
 
             schedule_day_text = weekly_schedule_obj.get_weekly_schedule_day()
-            schedule_markup = keyboards.get_weekly_schedule_keyboard(schedule_obj.available_weeks, weekly_schedule_obj.week_num)
-            schedule_message = await message.answer(text=schedule_day_text, reply_markup=schedule_markup, parse_mode='Markdown')
+            schedule_markup = skb.get_weekly_schedule_keyboard(schedule_obj.available_weeks, weekly_schedule_obj.week_num)
+            schedule_message = await message.answer(text=schedule_day_text,
+                                                    reply_markup=schedule_markup,
+                                                    parse_mode='Markdown')
 
             lsm.message_id = schedule_message.message_id
             lsm.chat_id = message.chat.id
             lsm.save_message_data()
         else:
             await message.answer(schedule_messages.get('holiday'), parse_mode='Markdown')
-    except:
-        await message.answer('Ошибка при загрузке данных')
+    except ...:
+        await message.answer('📦 Ошибка при загрузке данных')
     finally:
         await bot_message.delete()
         await state.finish()
@@ -148,7 +152,7 @@ async def send_gpt_request(message: types.Message):
     try:
         gpt_response = gpt_model.response_to_message(message.text.partition(' ')[2])
         await message.reply(text=gpt_response)
-    except:
+    except ...:
         await message.answer(text=base_messages.get('error'), parse_mode='Markdown')
     finally:
         await bot_message.delete()
@@ -157,12 +161,13 @@ async def send_gpt_request(message: types.Message):
 @dp.callback_query_handler(lambda callback: callback.data.startswith('schedule_week'))
 async def callback_schedule_weeks(callback: types.CallbackQuery):
     await callback.message.delete()
-    bot_message = await callback.message.answer(text=schedule_messages.get('load'), reply_markup=ReplyKeyboardRemove())
+    bot_message = await callback.message.answer(text=schedule_messages.get('load'),
+                                                reply_markup=ReplyKeyboardRemove(),
+                                                parse_mode='Markdown')
 
     week_num = int(callback.data[callback.data.rfind('_') + 1:])
-
     if week_num == weekly_schedule_obj.week_num:
-        await callback.answer('✅ Эта неделя уже выбрана')
+        await callback.answer('🫵 Эта неделя уже выбрана')
     else:
         weekly_schedule_obj.week_num = week_num
         is_schedule_exist = weekly_schedule_obj.check_to_create_new()
@@ -175,8 +180,10 @@ async def callback_schedule_weeks(callback: types.CallbackQuery):
             weekly_schedule_obj.save_data()
 
         schedule_day_text = weekly_schedule_obj.get_weekly_schedule_day()
-        schedule_markup = keyboards.get_weekly_schedule_keyboard(schedule_obj.available_weeks, week_num)
-        schedule_message = await callback.message.answer(text=schedule_day_text, reply_markup=schedule_markup, parse_mode='Markdown')
+        schedule_markup = skb.get_weekly_schedule_keyboard(schedule_obj.available_weeks, week_num)
+        schedule_message = await callback.message.answer(text=schedule_day_text,
+                                                         reply_markup=schedule_markup,
+                                                         parse_mode='Markdown')
 
         lsm.message_id = schedule_message.message_id
         lsm.chat_id = callback.message.chat.id
@@ -190,12 +197,12 @@ async def callback_schedule_weeks(callback: types.CallbackQuery):
 async def callback_weekly_schedule_days(callback: types.CallbackQuery):
     day_num = int(callback.data[-1])
     if day_num == weekly_schedule_obj.day_num:
-        await callback.answer('✅ Этот день уже выбран')
+        await callback.answer('🫵 Этот день уже выбран')
     else:
         weekly_schedule_obj.day_num = day_num
-        schedule_day_text = weekly_schedule_obj.get_weekly_schedule_day(day_num=day_num)
+        schedule_day_text = weekly_schedule_obj.get_weekly_schedule_day()
         await callback.message.edit_text(text=schedule_day_text, parse_mode='Markdown')
-        await callback.message.edit_reply_markup(reply_markup=keyboards.get_weekly_schedule_keyboard(schedule_obj.available_weeks, weekly_schedule_obj.week_num))
+        await callback.message.edit_reply_markup(reply_markup=skb.get_weekly_schedule_keyboard(schedule_obj.available_weeks, weekly_schedule_obj.week_num))
         await callback.answer()
 
 if __name__ == '__main__':

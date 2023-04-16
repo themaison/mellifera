@@ -1,7 +1,7 @@
 UNIVERS_SCHEDULE = 'https://www.sevsu.ru/univers/shedule/'
 
-XLSX_PATH = 'D:/PyCharm Projects/mellifera/Schedules/Xlsx/'
-DATA_PATH = 'D:/PyCharm Projects/mellifera/Schedules/Data/'
+SCHEDULE_XLSX_PATH = 'D:/PyCharm Projects/mellifera/Schedules/Xlsx/'
+SCHEDULE_DATA_PATH = 'D:/PyCharm Projects/mellifera/Schedules/Data/'
 WEEKLY_SCHEDULE_DATA_PATH = 'D:/PyCharm Projects/mellifera/Schedules/Data/WeeklyScheduleData/'
 
 LEGACY_FILENAME = 'ИИТ-21-о.xlsx'

@@ -1,15 +1,14 @@
-import sevsu_constants
-
+from sevsch import sevsu_url_constants as suc
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 sevsu_markup = InlineKeyboardMarkup(row_width=2)
-lk = InlineKeyboardButton(text='👤 Кабинет', url=sevsu_constants.LK_URL)
-mudl = InlineKeyboardButton(text='💻 Мудл', url=sevsu_constants.DO_SEVSU_URL)
-rocket = InlineKeyboardButton(text='🚀 Рокет-чат', url=sevsu_constants.ROCKET_CHAT_URL)
-elective = InlineKeyboardButton(text='🎽 Элективы', url=sevsu_constants.ELECTIVE_URL)
-sch = InlineKeyboardButton(text='📖 Расписание', url=sevsu_constants.SCHEDULE_URL)
-sevsu_site = InlineKeyboardButton(text='🌊 Сайт', url=sevsu_constants.SEVSU_URL)
+lk = InlineKeyboardButton(text='👤 Кабинет', url=suc.LK_URL)
+mudl = InlineKeyboardButton(text='💻 Мудл', url=suc.DO_SEVSU_URL)
+rocket = InlineKeyboardButton(text='🚀 Рокет-чат', url=suc.ROCKET_CHAT_URL)
+elective = InlineKeyboardButton(text='🎽 Элективы', url=suc.ELECTIVE_URL)
+sch = InlineKeyboardButton(text='📖 Расписание', url=suc.SCHEDULE_URL)
+sevsu_site = InlineKeyboardButton(text='🌊 Сайт', url=suc.SEVSU_URL)
 sevsu_markup.add(sevsu_site, lk, sch, mudl, rocket, elective)
 
 schedule_groups_markup = ReplyKeyboardMarkup(resize_keyboard=True, row_width=4)

@@ -1,32 +1,36 @@
-import schedule_constants
-import schedule
 import json
 
+from sevsch import schedule as sch
+from sevsch import schedule_constants as sc
 from openpyxl import Workbook, load_workbook
 from datetime import datetime
 from os import path
-
-
-def get_filename(week_num, group_num, default_type=True):
-    filename = f'{schedule_constants.IIT_GROUP_NAMES.get(group_num)} ({week_num} нед.)'
-    filename += '.json' if default_type else '.xlsx'
-    return filename
 
 
 def get_week():
     return datetime.today().isocalendar().week
 
 
+def get_week_day():
+    return min(datetime.today().isoweekday(), 6)
+
+
+def get_filename(week_num, group_num, default_type=True):
+    filename = f'{sc.IIT_GROUP_NAMES.get(group_num)} ({week_num} нед.)'
+    filename += '.json' if default_type else '.xlsx'
+    return filename
+
+
 def get_xlsx_file_path(filename):
-    return path.join(schedule_constants.XLSX_PATH, filename)
+    return path.join(sc.SCHEDULE_XLSX_PATH, filename)
 
 
 def get_weekly_schedule_data_path(filename):
-    return path.join(schedule_constants.WEEKLY_SCHEDULE_DATA_PATH, filename)
+    return path.join(sc.WEEKLY_SCHEDULE_DATA_PATH, filename)
 
 
 def get_available_weeks_data_path():
-    return path.join(schedule_constants.DATA_PATH, schedule_constants.AVAILABLE_WEEKS_DATA_FILENAME)
+    return path.join(sc.SCHEDULE_DATA_PATH, sc.AVAILABLE_WEEKS_DATA_FILENAME)
 
 
 def is_available_weeks_data():
@@ -42,49 +46,50 @@ def is_weekly_schedule_data(filename):
 
 
 class WeeklySchedule:
-    def __init__(self, group_num=2, week_num=get_week(), day_num=3):
+    def __init__(self, group_num=2, week_num=get_week(), day_num=get_week_day()):
         self.group_num = group_num
         self.week_num = week_num
         self.day_num = day_num
         self.weekly_schedule = dict()
 
-    def get_weekly_schedule_day(self, day_num=3):
-        return self.weekly_schedule.get(schedule_constants.DAY_NAMES.get(day_num))
+    def get_weekly_schedule_day(self):
+        return self.weekly_schedule.get(sc.DAY_NAMES.get(self.day_num))
 
     def check_to_create_new(self):
         filename = get_filename(week_num=self.week_num, group_num=self.group_num)
         return is_weekly_schedule_data(filename)
 
     def create_xlsx(self):
-        book = load_workbook(schedule.get_legacy_file_path(), read_only=True)
+        book = load_workbook(sch.get_legacy_file_path(), read_only=True)
         sheet_name = f'неделя {self.week_num}(уч.н.{self.week_num + 18})'
         sheet = book[sheet_name]
 
-        # новый excel файл
         weekly_book = Workbook()
         weekly_sheet = weekly_book.active
-        weekly_sheet = self.copy_data(sheet, weekly_sheet)  # копирование данных из по выбранной недели
+        weekly_sheet = self.copy_data(sheet, weekly_sheet)
 
         filename = get_filename(group_num=self.group_num, week_num=self.week_num, default_type=False)
         weekly_book.save(get_xlsx_file_path(filename))  # сохранение изменений
 
     def copy_data(self, sheet, weekly_sheet):
-        group_name = schedule_constants.IIT_GROUP_NAMES.get(self.group_num)
-        beg_column, column_len, beg_row, end_row, cur_column = 1, 10, 4 if self.week_num % 2 != 0 else 1, 54, 1
+        group_name = sc.IIT_GROUP_NAMES.get(self.group_num)
+        beg_column, column_len, beg_row, row_len = 1, 10, 1, 54
 
-        while True:
-            cell = sheet.cell(row=beg_row, column=cur_column)
-            cell_text = str(cell.value).strip().replace('/', '')
-            if group_name in cell_text:
-                beg_column = cur_column
-                break
-            cur_column += 1
+        # определение начала среза данных
+        for row in range(1, 10):
+            for column in range(1, 200):
+                cell = sheet.cell(row=row, column=column)
+                cell_text = str(cell.value).strip().replace('/', '')
+                if group_name in cell_text:
+                    beg_row = row
+                    beg_column = column
+                    break
 
         # копирование данных по срезу
-        for r in range(beg_row, end_row + 1):
-            for c in range(beg_column, beg_column + column_len):
-                legacy_value = sheet.cell(row=r, column=c).value
-                weekly_sheet.cell(row=r - beg_row + 1, column=c - beg_column + 1, value=legacy_value)
+        for row in range(beg_row, beg_row + row_len):
+            for column in range(beg_column, beg_column + column_len):
+                legacy_value = sheet.cell(row=row, column=column).value
+                weekly_sheet.cell(row=row - beg_row + 1, column=column - beg_column + 1, value=legacy_value)
         return weekly_sheet
 
     def define_weekly_schedule(self):
@@ -96,7 +101,7 @@ class WeeklySchedule:
 
         day_num = 1
         for row in range(4, 52, 8):
-            day_schedule_value = f'🔎 *{schedule_constants.IIT_GROUP_NAMES.get(self.group_num)} | {self.week_num} Неделя | {schedule_constants.DAY_NAMES.get(day_num)}*'
+            day_schedule_value = f'🔎 *{sc.IIT_GROUP_NAMES.get(self.group_num)} | {self.week_num} Неделя | {sc.DAY_NAMES.get(day_num)}*'
 
             for pair_num in range(row, row + 8):
                 time_block = improve_sheet[f'D{pair_num}'].value
@@ -132,7 +137,7 @@ class WeeklySchedule:
 
                     day_schedule_value += f'\n{pair_text}'
 
-            self.weekly_schedule[schedule_constants.DAY_NAMES.get(day_num)] = day_schedule_value
+            self.weekly_schedule[sc.DAY_NAMES.get(day_num)] = day_schedule_value
             day_num += 1
 
     def save_data(self):

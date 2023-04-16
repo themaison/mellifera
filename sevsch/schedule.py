@@ -1,23 +1,22 @@
-import schedule_constants
-import weekly_schedule
 import requests
 import json
 
+from sevsch import schedule_constants as sc
 from openpyxl import load_workbook
 from os import path, remove, listdir
 from bs4 import BeautifulSoup
 
 
 def get_legacy_file_path():
-    return path.join(schedule_constants.XLSX_PATH, schedule_constants.LEGACY_FILENAME)
+    return path.join(sc.SCHEDULE_XLSX_PATH, sc.LEGACY_FILENAME)
 
 
 def get_url_data_path():
-    return path.join(schedule_constants.DATA_PATH, schedule_constants.URL_DATA_FILENAME)
+    return path.join(sc.SCHEDULE_DATA_PATH, sc.URL_DATA_FILENAME)
 
 
 def get_iit_data_path():
-    return path.join(schedule_constants.DATA_PATH, schedule_constants.IIT_DATA_FILENAME)
+    return path.join(sc.SCHEDULE_DATA_PATH, sc.IIT_DATA_FILENAME)
 
 
 def is_legacy_file():
@@ -33,7 +32,7 @@ def is_iit_data():
 
 
 def get_available_weeks_data_path():
-    return path.join(schedule_constants.DATA_PATH, schedule_constants.AVAILABLE_WEEKS_DATA_FILENAME)
+    return path.join(sc.SCHEDULE_DATA_PATH, sc.AVAILABLE_WEEKS_DATA_FILENAME)
 
 
 def is_available_weeks_data():
@@ -41,13 +40,13 @@ def is_available_weeks_data():
 
 
 def clear_xlsx_files():
-    for file in listdir(schedule_constants.XLSX_PATH):
-        remove(path.join(schedule_constants.XLSX_PATH, file))
+    for file in listdir(sc.SCHEDULE_XLSX_PATH):
+        remove(path.join(sc.SCHEDULE_XLSX_PATH, file))
 
 
 def clear_weekly_schedule_files():
-    for file in listdir(schedule_constants.WEEKLY_SCHEDULE_DATA_PATH):
-        remove(path.join(schedule_constants.WEEKLY_SCHEDULE_DATA_PATH, file))
+    for file in listdir(sc.WEEKLY_SCHEDULE_DATA_PATH):
+        remove(path.join(sc.WEEKLY_SCHEDULE_DATA_PATH, file))
 
 
 class Schedule:
@@ -57,7 +56,7 @@ class Schedule:
         self.available_weeks = list()
 
     def check_url(self):
-        response = requests.get(schedule_constants.UNIVERS_SCHEDULE)
+        response = requests.get(sc.UNIVERS_SCHEDULE)
         if response.status_code == 200:
             schedules_html = BeautifulSoup(response.content, 'html.parser')
             semester_block = schedules_html.find(class_='document-accordion document-accordion-2',
@@ -96,7 +95,7 @@ class Schedule:
 
         for sheetname in book.sheetnames:
             week_name = str(sheetname).partition('(')[0].partition(' ')[2]
-            if week_name.isdigit() and int(week_name) >= weekly_schedule.get_week():
+            if week_name.isdigit():
                 self.available_weeks.append(int(week_name))
 
     def save_iit_schedules_data(self):
@@ -131,7 +130,7 @@ class Schedule:
 
 
 def get_last_message_data_path():
-    return path.join(schedule_constants.DATA_PATH, schedule_constants.LAST_MESSAGE_DATA_FILE_NAME)
+    return path.join(sc.SCHEDULE_DATA_PATH, sc.LAST_MESSAGE_DATA_FILE_NAME)
 
 
 def is_last_message_data():
