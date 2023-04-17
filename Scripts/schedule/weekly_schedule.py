@@ -1,10 +1,10 @@
 import json
 
-from schedule import schedule as sch
-from schedule import constants as sc
-from openpyxl import Workbook, load_workbook
-from datetime import datetime
 from os import path
+from datetime import datetime
+from openpyxl import Workbook, load_workbook
+from Scripts.schedule import constants as sc
+from Scripts.schedule import general_schedule as gsch
 
 
 def get_week():
@@ -65,7 +65,7 @@ class WeeklySchedule:
         return is_weekly_schedule_data(filename)
 
     def create_xlsx(self):
-        book = load_workbook(sch.get_legacy_file_path(), read_only=True)
+        book = load_workbook(gsch.get_legacy_file_path(), read_only=True)
         sheet_name = f'неделя {self.week_num}(уч.н.{self.week_num + 18})'
         sheet = book[sheet_name]
 

@@ -1,10 +1,10 @@
-import requests
 import json
+import requests
 
-from schedule import constants as sc
+from bs4 import BeautifulSoup
 from openpyxl import load_workbook
 from os import path, remove, listdir
-from bs4 import BeautifulSoup
+from Scripts.schedule import constants as sc
 
 
 def get_legacy_file_path():
@@ -130,7 +130,7 @@ class Schedule:
 
 
 def get_last_message_data_path():
-    return path.join(sc.SCHEDULE_DATA_PATH, sc.LAST_MESSAGE_DATA_FILE_NAME)
+    return path.join(sc.SCHEDULE_DATA_PATH, sc.LAST_MESSAGE_DATA_FILENAME)
 
 
 def is_last_message_data():

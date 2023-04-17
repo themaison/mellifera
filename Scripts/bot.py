@@ -1,18 +1,17 @@
-import logging
 import config
+import logging
 import gpt_model
 import keyboards as skb
 import messages_constants as msgc
 
-from schedule import schedule as sch
-from schedule import weekly_schedule as wsch
-
-from aiogram.types import ReplyKeyboardRemove, InlineKeyboardMarkup
-from aiogram.dispatcher.filters.state import StatesGroup, State
-from aiogram.contrib.fsm_storage.memory import MemoryStorage
-from aiogram import Bot, Dispatcher, executor, types
-from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher import filters
+from aiogram.dispatcher import FSMContext
+from schedule import weekly_schedule as wsch
+from schedule import general_schedule as gsch
+from aiogram import Bot, Dispatcher, executor, types
+from aiogram.contrib.fsm_storage.memory import MemoryStorage
+from aiogram.dispatcher.filters.state import StatesGroup, State
+from aiogram.types import ReplyKeyboardRemove, InlineKeyboardMarkup
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -27,11 +26,11 @@ class ScheduleStatesGroup(StatesGroup):
     group = State()
 
 
-sch_obj = sch.Schedule()
+sch_obj = gsch.Schedule()
 sch_obj.load_url()
 sch_obj.load_available_weeks()
 
-lsm = sch.LastScheduleMessage()
+lsm = gsch.LastScheduleMessage()
 lsm.load_message_data()
 
 wsch_obj = wsch.WeeklySchedule()

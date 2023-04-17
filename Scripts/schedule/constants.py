@@ -8,7 +8,7 @@ LEGACY_FILENAME = 'ИИТ-21-о.xlsx'
 URL_DATA_FILENAME= 'url_data.txt'
 IIT_DATA_FILENAME = 'iit_data.json'
 AVAILABLE_WEEKS_DATA_FILENAME = 'available_weeks_data.txt'
-LAST_MESSAGE_DATA_FILE_NAME = 'last_message_data.txt'
+LAST_MESSAGE_DATA_FILENAME = 'last_message_data.txt'
 
 IIT_GROUP_NAMES = {
     1: 'ИСб-21-1-о',
